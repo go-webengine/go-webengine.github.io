@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ .Site.Title }} — pure-Go headless web engine</title>
+<meta name="description" content="A pure-Go, CGO_ENABLED=0 headless web engine: fetch a URL, parse HTML into a DOM, apply a real CSS cascade, lay out block-and-inline flow, and paint anti-aliased text, backgrounds and images to an image — no Chromium, no cgo. Phase 0 static renderer; the rendering core of the wasmdesk browserproxy roadmap.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1b1f24; --muted: #57606a; --card: #f6f8fa;
+    --border: #d0d7de; --accent: #0079a8; --accent-fg: #ffffff;
+    --ship: #0079a8; --plan: #9a6700;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+      --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --card: #161b22;
+      --border: #30363d; --accent: #22cce2; --accent-fg: #0d1117;
+      --ship: #22cce2; --plan: #d29922;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --card: #161b22;
+    --border: #30363d; --accent: #22cce2; --accent-fg: #0d1117;
+    --ship: #22cce2; --plan: #d29922;
+  }
+  :root[data-theme="light"] {
+    --bg: #ffffff; --fg: #1b1f24; --muted: #57606a; --card: #f6f8fa;
+    --border: #d0d7de; --accent: #0079a8; --accent-fg: #ffffff;
+    --ship: #0079a8; --plan: #9a6700;
+  }
+  .theme-toggle {
+    position: fixed; top: 14px; right: 14px; z-index: 10;
+    font: inherit; font-size: .8rem; cursor: pointer; padding: 6px 12px;
+    color: var(--fg); background: var(--card); border: 1px solid var(--border); border-radius: 999px;
+  }
+  .theme-toggle:hover { border-color: var(--accent); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+  header { padding: 72px 0 32px; text-align: center; }
+  .logo { width: 88px; height: 88px; margin: 0 auto 18px; display: block; }
+  h1 { font-size: 2.6rem; margin: 0 0 .3em; letter-spacing: -.02em; }
+  .tagline { font-size: 1.2rem; color: var(--muted); margin: 0 auto; max-width: 700px; }
+  .pills { margin: 22px 0 0; }
+  .pill {
+    display: inline-block; margin: 4px; padding: 3px 10px; font-size: .82rem;
+    color: var(--muted); background: var(--card); border: 1px solid var(--border); border-radius: 999px;
+  }
+  .cta { margin: 30px 0 0; }
+  .btn {
+    display: inline-block; padding: 10px 18px; margin: 4px; border-radius: 8px; text-decoration: none;
+    font-weight: 600; border: 1px solid var(--border);
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .btn.ghost { color: var(--fg); background: transparent; }
+  .lead { color: var(--fg); max-width: 820px; margin: 8px auto 0; text-align: center; }
+  .lead code { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
+  h2.section { text-align: center; margin: 44px 0 4px; font-size: 1.4rem; }
+  pre.pipe {
+    max-width: 820px; margin: 14px auto 0; overflow-x: auto; background: var(--card);
+    border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px;
+    font: .82rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--fg);
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; padding: 16px 0 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; }
+  .card h3 { margin: 0 0 .35em; font-size: 1.2rem; display: flex; align-items: center; justify-content: space-between; }
+  .card h3 a { text-decoration: none; }
+  .card p { margin: 0 0 .8em; color: var(--fg); font-size: .95rem; }
+  .card .badges { margin-top: auto; }
+  .card .badges img { height: 20px; vertical-align: middle; }
+  .type { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px; color: var(--accent); border: 1px solid var(--accent); }
+  .phases { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; padding: 16px 0 8px; }
+  .phase { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .phase h3 { margin: 0 0 .3em; font-size: 1.05rem; }
+  .phase .state { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
+  .phase .state.shipping { color: var(--accent-fg); background: var(--ship); }
+  .phase .state.planned { color: var(--plan); border: 1px solid var(--plan); }
+  .phase p { margin: .4em 0 0; color: var(--muted); font-size: .9rem; }
+  .principles { color: var(--muted); text-align: center; padding: 10px 0 0; max-width: 820px; margin: 0 auto; }
+  footer { color: var(--muted); text-align: center; padding: 40px 0 56px; font-size: .9rem; }
+  a { color: var(--accent); }
+</style>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script>
+  (function(){var m=localStorage.getItem('theme');if(m&&m!=='system')document.documentElement.setAttribute('data-theme',m);})();
+</script>
+</head>
+<body>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light, dark or system theme"><span id="theme-label">🖥️ System</span></button>
+  <header class="wrap">
+    <img class="logo" src="/img/logo.svg" alt="go-webengine logo" width="88" height="88">
+    <h1>go-webengine</h1>
+    <p class="tagline">A pure-Go, <strong>headless web engine</strong> — give it a URL,
+      get back an <strong>image of the page</strong>. HTML/CSS layout and paint with
+      <strong>no Chromium and no cgo</strong>.</p>
+    <div class="pills">
+      <span class="pill">CGO_ENABLED=0</span>
+      <span class="pill">no Chromium · no host web view</span>
+      <span class="pill">HTML → DOM → CSS cascade → layout → paint → PNG</span>
+      <span class="pill">amd64 · arm64 · riscv64 · loong64 · ppc64le · s390x</span>
+      <span class="pill">ratchet coverage gate</span>
+      <span class="pill">honest fidelity report</span>
+    </div>
+    <div class="cta">
+      <a class="btn primary" href="https://go-webengine.github.io/docs/">Documentation</a>
+      <a class="btn ghost" href="https://github.com/go-webengine/engine">GitHub</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <p class="lead">Modern "render a web page" tooling almost always means shipping a whole
+      browser &mdash; Chromium via CDP, a WebView, cgo bindings. <strong>go-webengine renders in
+      pure Go.</strong> It fetches the page, builds an owned DOM over
+      <a href="https://pkg.go.dev/golang.org/x/net/html">x/net/html</a>, runs a minimal-but-real
+      CSS cascade (specificity + inheritance), lays out block-and-inline flow with a greedy
+      word-wrap line-breaker, and paints anti-aliased text
+      (<a href="https://github.com/go-opentype/opentype">go-opentype</a>), backgrounds and images
+      onto an <code>image.RGBA</code>. One static binary, no C toolchain, identical on every OS.</p>
+
+    <pre class="pipe">Fetch (go-browserhttp)  &rarr;  Parse (x/net/html &rarr; dom)  &rarr;  Cascade (css)
+     &rarr;  Layout: block + inline flow, word-wrap (layout)
+     &rarr;  Paint: AA text (go-opentype) + backgrounds (go-widgets/painter) + images (go-images)
+     &rarr;  image.RGBA  &rarr;  PNG</pre>
+
+    <p class="lead" style="margin-top:22px">It is the rendering core of the
+      <a href="https://github.com/wasmdesk">wasmdesk</a> <strong>browserproxy</strong> roadmap.
+      Phase 0 &mdash; <strong>shipping today</strong> &mdash; is a <em>static</em> renderer: no JavaScript, no
+      float/flex/grid, so script-driven and multi-column page chrome linearises. What works and
+      what does not is documented honestly, page by page, in the engine's
+      <a href="https://github.com/go-webengine/engine/blob/main/FIDELITY.md">fidelity report</a>.</p>
+
+    <h2 class="section">Repositories</h2>
+    <section class="grid">
+      {{ range .Site.Params.repos }}
+      <article class="card">
+        <h3>
+          <a href="https://github.com/go-webengine/{{ .name }}"><code>{{ .name }}</code></a>
+          <span class="type">{{ .type }}</span>
+        </h3>
+        <p style="font-weight:600;color:var(--accent);margin:.2rem 0 .5rem">{{ .role }}</p>
+        <p>{{ .blurb }}</p>
+        {{ if .badge }}
+        <div class="badges">
+          <a href="https://github.com/go-webengine/{{ .name }}/actions/workflows/ci.yml"><img src="https://github.com/go-webengine/{{ .name }}/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+          <img src="https://img.shields.io/badge/coverage-97%25%2B%20ratchet-brightgreen" alt="coverage ratchet">
+          <img src="https://img.shields.io/badge/License-BSD--3--Clause-blue.svg" alt="BSD-3-Clause">
+        </div>
+        {{ end }}
+      </article>
+      {{ end }}
+    </section>
+
+    <h2 class="section">Roadmap</h2>
+    <section class="phases">
+      {{ range .Site.Params.phases }}
+      <div class="phase">
+        <h3>Phase {{ .n }} &middot; {{ .title }}<span class="state {{ .state }}">{{ .state }}</span></h3>
+        <p>{{ .text }}</p>
+      </div>
+      {{ end }}
+    </section>
+
+    <p class="principles">Pure Go, <code>CGO_ENABLED=0</code>, cross-built for all six of Go's
+      64-bit targets. The pure-logic packages (cascade, line-breaker, box metrics, DOM) are
+      asserted at exact geometry behind a ratchet coverage gate; a committed golden PNG covers the
+      offline paint path. Prior pure-Go browser work (opossum / mycel) was studied but not built
+      on &mdash; its layout core is stub-quality; see the survey. BSD-3-Clause throughout.</p>
+  </main>
+
+  <footer class="wrap">
+    BSD-3-Clause · <a href="https://github.com/go-webengine">github.com/go-webengine</a> ·
+    part of the <a href="https://github.com/wasmdesk">wasmdesk</a> roadmap
+  </footer>
+  <script>
+  (function(){
+    var order=['system','light','dark'], root=document.documentElement;
+    var labels={system:'🖥️ System',light:'☀️ Light',dark:'🌙 Dark'};
+    function apply(m){ if(m==='system'){root.removeAttribute('data-theme');}else{root.setAttribute('data-theme',m);} localStorage.setItem('theme',m); var el=document.getElementById('theme-label'); if(el)el.textContent=labels[m]; }
+    var mode=localStorage.getItem('theme')||'system'; apply(mode);
+    var btn=document.getElementById('theme-toggle');
+    if(btn) btn.addEventListener('click',function(){ mode=order[(order.indexOf(mode)+1)%order.length]; apply(mode); });
+  })();
+  </script>
+</body>
+</html>

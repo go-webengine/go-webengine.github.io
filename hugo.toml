@@ -1,0 +1,36 @@
+baseURL = "https://go-webengine.github.io/"
+title = "go-webengine"
+disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+# Code repositories in the org. `type` = lib / cli / infra.
+[[params.repos]]
+  name = "engine"
+  role = "The rendering core"
+  type = "lib + cli"
+  blurb = "Fetch a URL → DOM → CSS cascade + inheritance → block/inline flow layout → paint anti-aliased text, backgrounds and images to an image.RGBA / PNG. Pure Go, CGO_ENABLED=0, no Chromium. Phase 0 is a static (no-JS) renderer; ships a `render` CLI."
+  badge = true
+
+# Roadmap phases (honest: Phase 0 is what ships today).
+[[params.phases]]
+  n = "0"
+  title = "Static renderer"
+  state = "shipping"
+  text = "HTML parse, a real CSS cascade (specificity + inheritance), block-and-inline flow with word-wrap, and anti-aliased text / background / image paint to an image. No JavaScript."
+[[params.phases]]
+  n = "1"
+  title = "Scripting"
+  state = "planned"
+  text = "A pure-Go JavaScript engine (goja) wired to the DOM so script-rendered content populates."
+[[params.phases]]
+  n = "2"
+  title = "Real box model"
+  state = "planned"
+  text = "float / flex / grid / table layout and positioning, so modern page chrome no longer linearises to a single column."
+[[params.phases]]
+  n = "3"
+  title = "browserproxy"
+  state = "planned"
+  text = "Render server-side and stream frames to the wasmdesk clients/browser front-end."
