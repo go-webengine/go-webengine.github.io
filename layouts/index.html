@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ .Site.Title }} — pure-Go headless web engine</title>
-<meta name="description" content="A pure-Go, CGO_ENABLED=0 headless web engine: fetch a URL, parse HTML into a DOM, apply a real CSS cascade, lay out block-and-inline flow, and paint anti-aliased text, backgrounds and images to an image — no Chromium, no cgo. Phase 0 static renderer; the rendering core of the wasmdesk browserproxy roadmap.">
+<meta name="description" content="A pure-Go, CGO_ENABLED=0 headless web engine: fetch a URL, parse HTML into a DOM, apply a real CSS cascade, run the page's JavaScript, lay out a full box model (flex/grid/tables/position), and paint anti-aliased text, gradients, images and SVG to an image — no Chromium, no cgo. The rendering core of the go-webengine browserproxy remote-browser service.">
 <style>
   :root {
     --bg: #ffffff; --fg: #1b1f24; --muted: #57606a; --card: #f6f8fa;
@@ -99,10 +99,12 @@
     <div class="pills">
       <span class="pill">CGO_ENABLED=0</span>
       <span class="pill">no Chromium · no host web view</span>
-      <span class="pill">HTML → DOM → CSS cascade → layout → paint → PNG</span>
+      <span class="pill">JavaScript (goja) + real DOM</span>
+      <span class="pill">flex · grid · tables · position</span>
+      <span class="pill">gradients · box-shadow · SVG</span>
       <span class="pill">amd64 · arm64 · riscv64 · loong64 · ppc64le · s390x</span>
       <span class="pill">ratchet coverage gate</span>
-      <span class="pill">honest fidelity report</span>
+      <span class="pill">measured vs headless Chrome</span>
     </div>
     <div class="cta">
       <a class="btn primary" href="https://go-webengine.github.io/docs/">Documentation</a>
@@ -114,23 +116,31 @@
     <p class="lead">Modern "render a web page" tooling almost always means shipping a whole
       browser &mdash; Chromium via CDP, a WebView, cgo bindings. <strong>go-webengine renders in
       pure Go.</strong> It fetches the page, builds an owned DOM over
-      <a href="https://pkg.go.dev/golang.org/x/net/html">x/net/html</a>, runs a minimal-but-real
-      CSS cascade (specificity + inheritance), lays out block-and-inline flow with a greedy
-      word-wrap line-breaker, and paints anti-aliased text
-      (<a href="https://github.com/go-opentype/opentype">go-opentype</a>), backgrounds and images
-      onto an <code>image.RGBA</code>. One static binary, no C toolchain, identical on every OS.</p>
+      <a href="https://pkg.go.dev/golang.org/x/net/html">x/net/html</a>, runs a real CSS cascade
+      (specificity + inheritance, <code>var()</code>, <code>@media</code>, dark-mode), executes the
+      page's JavaScript (<a href="https://github.com/dop251/goja">goja</a>) against a real DOM, lays
+      out a full box model (block, inline, float, flex, grid, table, <code>position</code>), and
+      paints anti-aliased text (<a href="https://github.com/go-opentype/opentype">go-opentype</a>),
+      gradients, box-shadows, images and SVG onto an <code>image.RGBA</code>. One static binary, no
+      C toolchain, identical on every OS.</p>
 
-    <pre class="pipe">Fetch (go-browserhttp)  &rarr;  Parse (x/net/html &rarr; dom)  &rarr;  Cascade (css)
-     &rarr;  Layout: block + inline flow, word-wrap (layout)
-     &rarr;  Paint: AA text (go-opentype) + backgrounds (go-widgets/painter) + images (go-images)
-     &rarr;  image.RGBA  &rarr;  PNG</pre>
+    <pre class="pipe">Fetch (go-browserhttp)  &rarr;  Parse (x/net/html &rarr; dom)  &rarr;  Cascade (css: +var()/@media/dark-mode)
+     &rarr;  JavaScript (js: goja + real DOM + fetch/XHR)
+     &rarr;  Layout: block &middot; inline &middot; float &middot; flex &middot; grid &middot; table &middot; position (layout)
+     &#8635;   settle loop: JS reads laid-out metrics &rarr; re-cascade + re-layout to a bounded fixpoint
+     &rarr;  Paint: AA text/SVG/gradients/shadows + backgrounds (go-widgets/painter) + images (go-images)
+     &rarr;  image.RGBA  &rarr;  PNG (+ optional link hit-map)</pre>
 
     <p class="lead" style="margin-top:22px">It is the rendering core of the
-      <a href="https://github.com/wasmdesk">wasmdesk</a> <strong>browserproxy</strong> roadmap.
-      Phase 0 &mdash; <strong>shipping today</strong> &mdash; is a <em>static</em> renderer: no JavaScript, no
-      float/flex/grid, so script-driven and multi-column page chrome linearises. What works and
-      what does not is documented honestly, page by page, in the engine's
-      <a href="https://github.com/go-webengine/engine/blob/main/FIDELITY.md">fidelity report</a>.</p>
+      <a href="https://github.com/go-webengine/browserproxy"><strong>browserproxy</strong></a>
+      remote-browser service and the <a href="https://github.com/wasmdesk">wasmdesk</a> in-desktop
+      browser. It is <strong>not</strong> a Chromium replacement and not claimed to match it
+      pixel-for-pixel: <code>example.com</code> renders at near-parity (0.954 SSIM, ~35&times;
+      faster), JS-heavy and large computed pages are the honest frontier (mean SSIM &asymp; 0.69).
+      What works and what does not is documented honestly, page by page and measured against
+      headless Chrome, in the engine's
+      <a href="https://github.com/go-webengine/engine/blob/main/FIDELITY.md">fidelity report</a>
+      and <a href="https://github.com/go-webengine/engine/blob/main/bench/REPORT.md">benchmark</a>.</p>
 
     <h2 class="section">Repositories</h2>
     <section class="grid">

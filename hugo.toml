@@ -10,27 +10,38 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   name = "engine"
   role = "The rendering core"
   type = "lib + cli"
-  blurb = "Fetch a URL → DOM → CSS cascade + inheritance → block/inline flow layout → paint anti-aliased text, backgrounds and images to an image.RGBA / PNG. Pure Go, CGO_ENABLED=0, no Chromium. Phase 0 is a static (no-JS) renderer; ships a `render` CLI."
+  blurb = "Fetch a URL → DOM → CSS cascade (var()/@media/dark-mode) → run the page's JavaScript → full box-model layout (flex/grid/tables/position) → paint anti-aliased text, gradients, images and SVG to an image.RGBA / PNG. Pure Go, CGO_ENABLED=0, no Chromium; ships a `render` CLI."
+  badge = true
+[[params.repos]]
+  name = "browserproxy"
+  role = "Remote-browser service"
+  type = "cli"
+  blurb = "Renders pages server-side with the engine and streams frames (plus a click hit-map) to a thin client over a JSON WebSocket protocol, forwarding clicks/scrolls/keys back as navigation. SSRF-guarded. The server half of the wasmdesk in-desktop browser."
   badge = true
 
-# Roadmap phases (honest: Phase 0 is what ships today).
+# Roadmap phases. Phases 0–2.4 have shipped; browserproxy is live.
 [[params.phases]]
-  n = "0"
-  title = "Static renderer"
+  n = "0–1"
+  title = "Static render + box model"
   state = "shipping"
-  text = "HTML parse, a real CSS cascade (specificity + inheritance), block-and-inline flow with word-wrap, and anti-aliased text / background / image paint to an image. No JavaScript."
+  text = "HTML parse, a real CSS cascade (specificity + inheritance), and a full box model — block/inline flow, floats, flexbox, CSS grid, tables and position — painted to an image."
 [[params.phases]]
-  n = "1"
-  title = "Scripting"
-  state = "planned"
-  text = "A pure-Go JavaScript engine (goja) wired to the DOM so script-rendered content populates."
+  n = "1.9–2.1"
+  title = "CSS breadth + SVG"
+  state = "shipping"
+  text = "var() custom properties, @media, dark-mode, modern colour, gradients, background-image, border-radius, box-shadow, opacity, and pure-Go SVG rasterisation."
 [[params.phases]]
-  n = "2"
-  title = "Real box model"
-  state = "planned"
-  text = "float / flex / grid / table layout and positioning, so modern page chrome no longer linearises to a single column."
+  n = "2–2.4"
+  title = "JavaScript + dynamic render"
+  state = "shipping"
+  text = "goja bound to a real DOM with fetch()/XHR and laid-out-geometry read-back; a settle-then-render loop reflects script-driven DOM mutations, on both the plain and click-hit-map paths."
 [[params.phases]]
   n = "3"
   title = "browserproxy"
+  state = "shipping"
+  text = "A WebSocket remote-browser service (its own repo) renders server-side with the engine and streams frames to the wasmdesk clients/browser front-end."
+[[params.phases]]
+  n = "next"
+  title = "Remaining levers"
   state = "planned"
-  text = "Render server-side and stream frames to the wasmdesk clients/browser front-end."
+  text = "Closing fidelity residuals (list markers, icon fonts, conic-gradient/filter/mask, SVG filters) and the perf gap on large computed pages. Diminishing returns — mean SSIM ≈ 0.69, example.com at 0.954."
