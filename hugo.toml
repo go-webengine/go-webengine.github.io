@@ -13,6 +13,11 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   blurb = "Fetch a URL → DOM → CSS cascade (var()/@media/dark-mode) → run the page's JavaScript → full box-model layout (flex/grid/tables/position) → paint anti-aliased text, gradients, images and SVG to an image.RGBA / PNG. Pure Go, CGO_ENABLED=0, no Chromium; ships a `render` CLI."
   badge = true
 [[params.repos]]
+  name = "esbuildsandbox"
+  role = "One function, against one leak"
+  type = "lib"
+  blurb = "A safe <code>ResolveDir</code> for esbuild's <code>pkg/api</code>. A caller bundling untrusted source installs an <code>OnResolve</code>/<code>OnLoad</code> plugin and it looks complete — every import in its own tests goes through it. But the bundler expands a <strong>glob dynamic import</strong>, <code>import(`./${lang}/index.js`)</code>, by walking <code>ResolveDir</code> on the <strong>real filesystem</strong> through its internal resolver, bypassing the plugin entirely. Whatever that directory is — <code>\"/\"</code> is a common default — is what gets walked, following symlinks. This returns a directory where that walk finds nothing."
+[[params.repos]]
   name = "browserproxy"
   role = "Remote-browser service"
   type = "cli"
