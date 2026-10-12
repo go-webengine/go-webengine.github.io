@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+{{/* Dark Reader repaints pages that already draw their own dark theme, as this one does: ask it to stand aside. */}}
+<meta name="darkreader-lock">
 <title>{{ .Site.Title }} — pure-Go headless web engine</title>
 <meta name="description" content="A pure-Go, CGO_ENABLED=0 headless web engine: fetch a URL, parse HTML into a DOM, apply a real CSS cascade, run the page's JavaScript, lay out a full box model (flex/grid/tables/position), and paint anti-aliased text, gradients, images and SVG to an image — no Chromium, no cgo. The rendering core of the go-webengine browserproxy remote-browser service.">
 <style>
