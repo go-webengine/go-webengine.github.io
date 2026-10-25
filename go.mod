@@ -2,4 +2,4 @@ module github.com/go-webengine/go-webengine.github.io
 
 go 1.27.3
 
-require github.com/go-fleettools/landingkit v0.7.0
+require github.com/go-fleettools/landingkit v0.7.1
