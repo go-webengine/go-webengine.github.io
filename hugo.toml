@@ -39,7 +39,7 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   n = "1.9–2.1"
   title = "CSS breadth + SVG"
   state = "shipping"
-  text = "var() custom properties, @media, dark-mode, modern colour, gradients, background-image, border-radius, box-shadow, opacity, and pure-Go SVG rasterisation."
+  text = "var() custom properties, @media, dark-mode, modern colour, gradients (sized and tiled with background-size), variable-font weights, the font shorthand, background-image, border-radius, box-shadow, opacity, and pure-Go SVG rasterisation."
 [[params.phases]]
   n = "2–2.4"
   title = "JavaScript + dynamic render"
