@@ -50,11 +50,9 @@
       <p class="sub">A pure-Go, <strong>headless web engine</strong> — give it a URL,
       get back an <strong>image of the page</strong>. HTML/CSS layout and paint with
       <strong>no Chromium and no cgo</strong>.</p>
-      <div class="cta">
-        <a class="btn btn-primary" href="https://go-webengine.github.io/docs/">{{ partial "icons/book.html" . }}Documentation</a>
-        <a class="btn btn-ghost" href="https://github.com/go-webengine/engine">{{ partial "icons/github.html" . }}GitHub</a>
-      </div>
-      <div class="trust">{{ if not (partial "mantra-on.html" $) }}<span class="pill">CGO_ENABLED=0</span>{{ end }}<span class="pill">no Chromium · no host web view</span><span class="pill">JavaScript (goja) + real DOM</span><span class="pill">flex · grid · tables · position</span><span class="pill">gradients · box-shadow · SVG</span><span class="pill">amd64 · arm64 · riscv64 · loong64 · ppc64le · s390x</span><span class="pill">ratchet coverage gate</span><span class="pill">measured vs headless Chrome</span></div>
+      {{/* [[params.cta]] in hugo.toml: the kit renders the row */}}
+      {{ partial "cta.html" . }}
+      <div class="trust">{{ if not (partial "mantra-on.html" $) }}<span class="pill">CGO_ENABLED=0</span>{{ end }}<span class="pill">no Chromium · no host web view</span><span class="pill">JavaScript (goja) + real DOM</span><span class="pill">flex · grid · tables · position</span><span class="pill">gradients · box-shadow · SVG</span><span class="pill">ratchet coverage gate</span><span class="pill">measured vs headless Chrome</span></div>
     </div>
     {{ partial "hero-carousel.html" . }}
   </div></div>

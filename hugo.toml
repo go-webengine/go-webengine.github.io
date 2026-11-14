@@ -10,6 +10,22 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 [markup.goldmark.renderer]
   unsafe = true
 
+# The architectures the tests RUN on (engine ci.yml: the test lanes run on
+# ubuntu-latest, amd64; its six-architecture job only cross-builds, and the
+# suite is not run under qemu because the rendering needs real fonts).
+[params.mantra]
+  goarch = ["amd64"]
+
+# The hero's buttons, rendered by landingkit's cta.html in the kit's order.
+[[params.cta]]
+  kind  = "docs"
+  href  = "https://go-webengine.github.io/docs/"
+  label = "Documentation"
+[[params.cta]]
+  kind  = "github"
+  href  = "https://github.com/go-webengine/engine"
+  label = "GitHub"
+
 # Code repositories in the org. `type` = lib / cli / infra.
 [[params.repos]]
   name = "engine"
