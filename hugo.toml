@@ -28,6 +28,11 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   type = "cli"
   blurb = "Renders pages server-side with the engine and streams frames (plus a click hit-map) to a thin client over a JSON WebSocket protocol, forwarding clicks/scrolls/keys back as navigation. SSRF-guarded. The server half of the wasmdesk in-desktop browser."
   badge = true
+[[params.repos]]
+  name = "webtest"
+  role = "Browser-automation CLI"
+  type = "cli"
+  blurb = "An HCL-driven browser-automation CLI on the engine: test scenarios that click, fill forms and assert, with no Chromium."
 
 # Roadmap phases. Phases 0–2.4 have shipped; browserproxy is live.
 [[params.phases]]
