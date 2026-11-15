@@ -47,9 +47,9 @@
   <div class="hero"><div class="wrap">
     <div>
       <h1 class="head">go-webengine</h1>
-      <p class="sub">A pure-Go, <strong>headless web engine</strong> — give it a URL,
+      <p class="sub">A {{ if partial "mantra-on.html" . }}Go{{ else }}pure-Go{{ end }}, <strong>headless web engine</strong> — give it a URL,
       get back an <strong>image of the page</strong>. HTML/CSS layout and paint with
-      <strong>no Chromium and no cgo</strong>.</p>
+      <strong>no Chromium and {{ if not (partial "mantra-on.html" $) }}no cgo{{ end }}</strong>.</p>
       {{/* [[params.cta]] in hugo.toml: the kit renders the row */}}
       {{ partial "cta.html" . }}
       <div class="trust">{{ if not (partial "mantra-on.html" $) }}<span class="pill">CGO_ENABLED=0</span>{{ end }}<span class="pill">no Chromium · no host web view</span><span class="pill">JavaScript (goja) + real DOM</span><span class="pill">flex · grid · tables · position</span><span class="pill">gradients · box-shadow · SVG</span><span class="pill">ratchet coverage gate</span><span class="pill">measured vs headless Chrome</span></div>
