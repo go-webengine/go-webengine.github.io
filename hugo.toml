@@ -31,7 +31,7 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   name = "engine"
   role = "The rendering core"
   type = "lib + cli"
-  blurb = "Fetch a URL → DOM → CSS cascade (var()/@media/dark-mode) → run the page's JavaScript → full box-model layout (flex/grid/tables/position) → paint anti-aliased text, gradients, images and SVG to an image.RGBA / PNG. Pure Go, CGO_ENABLED=0, no Chromium; ships a `render` CLI."
+  blurb = "Fetch a URL → DOM → CSS cascade (var()/@media/dark-mode) → run the page's JavaScript → full box-model layout (flex/grid/tables/position) → paint anti-aliased text, gradients, images and SVG to an image.RGBA / PNG. Pure Go, CGO_ENABLED=0, no Chromium; ships a `render` CLI. Also exposes an opt-in <code>navigator.gpu</code> WebGPU surface (compute, and as of M7 textures + render pipelines) via go-macos/metal, still no cgo."
   badge = true
 [[params.repos]]
   name = "esbuildsandbox"
@@ -71,6 +71,11 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   title = "browserproxy"
   state = "shipping"
   text = "A WebSocket remote-browser service (its own repo) renders server-side with the engine and streams frames to the wasmdesk clients/browser front-end."
+[[params.phases]]
+  n = "3.5"
+  title = "WebGPU (opt-in, M1–M7)"
+  state = "shipping"
+  text = "navigator.gpu via go-macos/metal (pure Go, no cgo): GPUDevice/GPUBuffer/GPUComputePipeline/GPUBindGroup/GPUCommandEncoder (M1–M5), then GPUTexture/GPUTextureView/GPURenderPipeline/GPURenderPassEncoder for real vertex/fragment rendering (M7), backed by a pure-Go WGSL→MSL translator (wgslmsl). Off by default (Engine.EnableWebGPU); see the engine's FIDELITY.md."
 [[params.phases]]
   n = "next"
   title = "Remaining levers"
